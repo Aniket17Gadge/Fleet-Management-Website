@@ -1,0 +1,529 @@
+create  table admin(
+                        uname VARCHAR2(30) not null,
+                        pass varchar(10) not null
+);
+--valid admin
+create or replace function advalid(a varchar, b varchar) return varchar is
+n varchar(50);
+p varchar(50);
+begin
+select UNAME,PASS into n,p from ADMIN where UNAME=a and PASS=b;
+if(n=a and p=b)then
+return('Login Successfully');
+end if;
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+return('Username or Password is wrong');
+end;
+
+create table Employee(id number primary key ,name varchar(30),department varchar(30),salary varchar(30));
+
+declare
+        total_rows number;
+        begin
+        update Employee
+            set salary=salary+5000 where department='IT';
+        if sql%notfound then
+            DBMS_OUTPUT.PUT_LINE('no data found');
+            else if sql%found then
+                total_rows := sql%rowcount;
+            dbms_output.put_line(total_rows||' '||'updated record successfully');
+        end if;
+end if;
+       end;
+
+
+declare
+        cursor cur
+     is select * from Employee;
+        begin
+          for i in cur
+          loop
+              DBMS_OUTPUT.PUT_LINE(i.name||' '||i.salary);
+          end loop;
+      end;
+
+declare
+    id Employee.id%type;
+    name Employee.name%type;
+    dept Employee.DEPARTMENT%type;
+    sal Employee.SALARY%type;
+    cursor c is select  name, department, salary from Employee;
+    begin
+
+    open c;
+    loop
+
+      fetch c into name,dept,sal;
+        exit when c%notfound;
+        DBMS_OUTPUT.PUT_LINE(name || ' ' || dept || ' ' || sal);
+
+    end loop;
+    close c;
+End;
+
+declare
+    cursor cur is select  name,  salary from Employee;
+
+    n varchar(20);
+    m varchar(20);
+    begin
+    open cur;
+    loop
+    fetch cur into n,m;
+     exit when(cur%notfound);
+    DBMS_OUTPUT.PUT_LINE(n||' '||m);
+    end loop;
+    end;
+
+
+declare
+    id number;
+    record EMPLOYEE%rowtype;
+    cursor c(eid number) is select * from EMPLOYEE where id=eid;
+    begin
+    id:=&id;
+    open c(id);
+    loop
+        fetch c into record;
+        exit when c%notfound;
+        DBMS_OUTPUT.PUT_LINE(record.id || ' ' || record.name || ' ' || record.department || ' '  || record.salary);
+
+    end loop;
+    close c;
+    end;
+
+
+
+
+
+--valid customer
+create or replace function cusvalid(a varchar, b varchar) return varchar is
+n varchar(50);
+p varchar(50);
+begin
+select UNAME,PASS into n,p from USERLOGIN where UNAME=a and PASS=b;
+if(n=a and p=b)then
+return('Login Successfully');
+end if;
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+return('Username or Password is Invalid');
+end;
+
+--customer count
+create  or replace  function cuscount
+    return  number is
+    D number(5) := 0;
+begin
+    select  count(*) into D
+    from USERLOGIN;
+    return D;
+end;
+
+CREATE TABLE Vehicle2 (
+                         Vehiclenumber varchar(20) primary key ,
+                         Vehiclename VARCHAR(30) ,
+                         Modelyear Varchar(30) ,
+                         ChassisNumber Varchar(30) ,
+                         Company Varchar(30) ,
+                         Registradate Varchar(10),
+                         Insurance_expdate varchar(20),
+                         weight varchar(20)
+
+);
+CREATE TABLE booking2(
+                         Bid number primary key ,
+                         username varchar(20),
+                         Dates VARCHAR(30) ,
+                         pickup  Varchar(30) ,
+                         Droppoint Varchar(30) ,
+                         Phonenumber Varchar(30) ,
+                         containernumber Varchar(10),
+                         Weight varchar(30),
+                         Km varchar(30),
+                         vno varchar(30),
+                         rent varchar(30),
+                         Totalpayment varchar(50)
+);
+CREATE SEQUENCE Bid2
+start with 101
+increment by 1
+NOCACHE
+NOCYCLE;
+
+CREATE SEQUENCE bno2
+start with 101
+increment by 1
+NOCACHE
+NOCYCLE;
+
+CREATE TABLE imgvehicle (
+                         img varchar(100) ,
+                         rent VARCHAR(30) ,
+                         weight Varchar(30) ,
+                         Vtype Varchar(30),
+                         Vno Varchar(30) references VEHICLE2(VEHICLENUMBER)
+);
+
+CREATE TABLE payment (
+                         bno number ,
+                         Dates VARCHAR(30),
+                         Totalpayment number
+);
+
+CREATE TABLE Billentry (
+                         Billno number primary key ,
+                         img varchar(100) ,
+                         userid number  references USERLOGIN(USID),
+                         Bookingid number references BOOKING2(Bid),
+                         Totalpayment varchar(50) ,
+                         Status Varchar(50)
+                       );
+
+CREATE TABLE Driver2 (
+                        D_id number primary key not null ,
+                        D_name VARCHAR2(30) not null,
+                        joindate Varchar(10) not null,
+                        Age number not null,
+                        LisecenceExpdate varchar2(20) not null ,
+                        salary number  not null );
+
+
+create or replace package fy
+AS
+procedure  addvehicle2(a varchar2,b varchar2,c varchar2, d varchar2,e varchar2,f varchar2,g varchar2,h varchar2);
+procedure dispvehicle2(vehicle2 out sys_refcursor,a out varchar2,b out varchar2,c out varchar2, d out varchar2,e out number,f out varchar2,g out varchar2,h out varchar2);
+procedure updatevehicle2(a varchar2,b varchar2,c varchar2,d varchar2);
+procedure delvehicles(a in varchar2);
+
+--addimgvehicle
+procedure  addimgvehicle(a varchar2,b varchar2,c varchar2, d varchar2,e varchar2);
+procedure disimgvehicle(IMG out sys_refcursor,a out varchar2,b out varchar2,c out varchar2,e out varchar2, d out varchar2);
+procedure delimgvehicle(a in varchar2);
+procedure upimgvehicle(a varchar2,b varchar2,c varchar2,d varchar2,e varchar2);
+
+--count
+function cvehicle
+return  number;
+
+function cdriver
+return  number;
+
+function cbook
+return  number;
+
+function cbill
+return  number;
+
+--billentry
+procedure  addbillentry(a varchar2,b number,c number,d varchar,e varchar);
+procedure dispbillentry(IMG out sys_refcursor,bno out number,a out varchar2,b out number,c out number,d out varchar2, e out varchar2);
+procedure delbillentry(bpdf in varchar2);
+procedure upbillentry(a varchar2,b number,c number,d varchar,e varchar,bno number);
+procedure dispbillentry11(IMG out sys_refcursor,bno out number,a out varchar2,b out number,d out varchar2, e out varchar2,c in number);
+
+--user
+procedure dispusers(users out sys_refcursor,uid out  number,un out varchar2,em  out varchar);
+procedure deluser(uid in number);
+procedure dispusers11(users out sys_refcursor,uid out  number,un out varchar2,em  out varchar,pass1 out varchar2);
+procedure disuserp11(user out sys_refcursor,a out varchar2,b out varchar2,c out varchar2,un in varchar);
+procedure updateuser(uid number,un varchar2,e varchar2,p varchar2);
+procedure getuid(id out sys_refcursor,a out number,b in varchar2);
+
+
+--driver
+procedure  addDriver1(dname varchar2,jdate varchar2, age1 number,liscdate varchar2,sala number);
+procedure dispdriver1(driver out sys_refcursor,did out number,dname out varchar2,jdate out  varchar2, age1 out number,liscdate out varchar2,sala out number);
+procedure updatedriver1(did number,liscdate varchar2,sala number,age1 number);
+procedure deldriver1(did in number);
+
+
+--booking
+procedure addbook(a varchar2,b varchar2,c varchar2,d varchar2,e varchar2,f varchar2,g varchar2,h varchar2,i varchar2,j varchar2,k varchar2);
+procedure disbook(book out sys_refcursor,a out varchar2,b out varchar2,c out varchar2,d out varchar2,e out varchar2,f out varchar2,g out varchar2,h out varchar2,i out varchar2,j out varchar2,k out varchar2,l out varchar2);
+procedure disuserbook(book out sys_refcursor,a out varchar2,b out varchar2,c out varchar2,d out varchar2,e out varchar2,f out varchar2,g out varchar2,h out varchar2,i out varchar2,j out varchar2,k out varchar2,l out varchar2,un in varchar);
+procedure delbook(baid in number);
+
+--userprofile
+     procedure disuserprofil(user out sys_refcursor,uid out number,a in varchar2,b out varchar2,c out varchar2);
+    procedure addpayment(bno1 number,d varchar2,t number);
+
+
+
+
+end;
+
+
+create or replace package body FY
+AS
+--register vehicle
+procedure addvehicle2(a varchar2,b varchar2,c varchar2, d varchar2,e varchar2,f varchar2,g varchar2,h varchar2)
+is
+begin
+    insert into VEHICLE2(VEHICLENUMBER, VEHICLENAME, MODELYEAR, CHASSISNUMBER, COMPANY, REGISTRADATE, INSURANCE_EXPDATE, WEIGHT)values(a,b,c,d,e,f,g,h);
+commit ;
+end addvehicle2;
+
+procedure dispvehicle2(vehicle2 out sys_refcursor,a out varchar2,b out varchar2,c out varchar2, d out varchar2,e out number,f out varchar2,g out varchar2,h out varchar2)
+as
+begin
+    open vehicle2 for
+        select VEHICLENUMBER, VEHICLENAME, MODELYEAR, CHASSISNUMBER, COMPANY, REGISTRADATE, INSURANCE_EXPDATE, WEIGHT into a,b,c,d,e,f,g,h from VEHICLE2;
+commit ;
+    end dispvehicle2;
+
+procedure updatevehicle2(a varchar2,b varchar2,c varchar2,d varchar2)
+    is
+begin
+    update VEHICLE2 set REGISTRADATE=a,INSURANCE_EXPDATE=b,WEIGHT=c  where VEHICLENUMBER=d;
+    commit;
+end updatevehicle2;
+
+
+
+ procedure delvehicles(a in varchar2)
+        is
+    begin
+        delete from VEHICLE2 where VEHICLENUMBER = a;
+        commit;
+    end delvehicles;
+
+--addimgvehicle
+procedure  addimgvehicle(a varchar2,b varchar2,c varchar2, d varchar2,e varchar2)
+is
+begin
+    insert into IMGVEHICLE(img, rent, weight, VTYPE,VNO)values(a,b,c,d,e);
+commit ;
+end addimgvehicle;
+
+procedure disimgvehicle(IMG out sys_refcursor,a out varchar2,b out varchar2,c out varchar2,e out varchar2, d out varchar2)
+    is
+begin
+    open IMG for
+        select IMG, RENT, WEIGHT, VTYPE,VNO into a,b,c,d,e from IMGVEHICLE;
+commit ;
+end disimgvehicle;
+
+ procedure delimgvehicle(a in varchar2)
+        is
+    begin
+        delete from IMGVEHICLE where IMG = a;
+        commit;
+    end delimgvehicle;
+
+
+procedure upimgvehicle(a varchar2,b varchar2,c varchar2,d varchar2,e varchar2)
+    is
+begin
+    update IMGVEHICLE set IMG=a,RENT=b,VTYPE=c,WEIGHT=d  where VNO=e;
+    commit;
+end upimgvehicle;
+
+--count
+    function cvehicle
+    return  number is
+    D number(5) := 0;
+begin
+    select  count(*) into D
+    from VEHICLE2;
+    return D;
+end cvehicle;
+
+function cdriver
+    return  number is
+    D number(5) := 0;
+begin
+    select  count(*) into D
+    from DRIVER2;
+    return D;
+end cdriver;
+
+function cbook
+    return  number is
+    D number(5) := 0;
+begin
+    select  count(*) into D
+    from BOOKING2;
+    return D;
+end cbook;
+
+function cbill
+    return  number is
+    D number(5) := 0;
+begin
+    select  count(*) into D
+ from BILLENTRY where Status='Unpaid';
+    return D;
+end cbill;
+
+ ---status updating
+
+
+
+
+--adbooking
+procedure addbook(a varchar2,b varchar2,c varchar2,d varchar2,e varchar2,f varchar2,g varchar2,h varchar2,i varchar2,j varchar2,k varchar2)
+is
+begin
+    insert into BOOKING2(BID, USERNAME, DATES, PICKUP, DROPPOINT, PHONENUMBER, CONTAINERNUMBER, WEIGHT, KM, VNO, RENT, TOTALPAYMENT)values(BID2.nextval,a,b,c,d,e,f,g,h,i,j,k);
+commit ;
+end addbook;
+
+procedure disbook(book out sys_refcursor,a out varchar2,b out varchar2,c out varchar2,d out varchar2,e out varchar2,f out varchar2,g out varchar2,h out varchar2,i out varchar2,j out varchar2,k out varchar2,l out varchar2)
+is
+begin
+    open book for
+        SELECT bid, username, dates, pickup, droppoint, phonenumber, containernumber, weight, km, vno, rent, totalpayment into a,b,c,d,e,f,g,h,i,j,k,l from  BOOKING2 ;
+    end disbook;
+
+ procedure disuserbook(book out sys_refcursor,a out varchar2,b out varchar2,c out varchar2,d out varchar2,e out varchar2,f out varchar2,g out varchar2,h out varchar2,i out varchar2,j out varchar2,k out varchar2,l out varchar2,un in varchar)
+is
+begin
+    open book for
+        SELECT bid, username, dates, pickup, droppoint, phonenumber, containernumber, weight, km, vno, rent, totalpayment into a,b,c,d,e,f,g,h,i,j,k,l from  BOOKING2  where  USERNAME=un order by BID DESC;
+    end disuserbook;
+
+ procedure disuserp11(user out sys_refcursor,a out varchar2,b out varchar2,c out varchar2,un in varchar)
+is
+begin
+    open user for
+        SELECT usid, email, pass into a,b,c from  USERLOGIN  where  UNAME=un ;
+    end disuserp11;
+
+ procedure delbook(baid in number)
+    is
+begin
+    delete from BOOKING2 where BID= baid;
+    commit;
+end delbook;
+
+
+--driver
+procedure  addDriver1(dname varchar2,jdate varchar2, age1 number,liscdate varchar2,sala number)
+    is
+begin
+    insert into DRIVER2(D_ID,D_NAME,JOINDATE,AGE,LISECENCEEXPDATE,SALARY)values(Did.nextval,dname,jdate,age1,liscdate,sala);
+    commit ;
+end addDriver1;
+
+procedure dispdriver1(driver out sys_refcursor,did out number,dname out varchar2,jdate out  varchar2, age1 out number,liscdate out varchar2,sala out number)
+as
+begin
+    open driver for
+        select  D_ID,D_NAME,JOINDATE,AGE,LISECENCEEXPDATE,SALARY  into did,dname,jdate,age1,liscdate,sala from DRIVER2;
+    commit ;
+end dispdriver1;
+
+ procedure updatedriver1(did number,liscdate varchar2,sala number,age1 number)
+    is
+begin
+    update DRIVER2 set LISECENCEEXPDATE=liscdate,SALARY=sala,AGE=age1 where D_ID=did;
+    commit;
+end updatedriver1;
+
+ procedure deldriver1(did in number)
+    is
+begin
+    delete from DRIVER2 where D_ID=did;
+    commit;
+end deldriver1;
+
+--user
+
+procedure dispusers(users out sys_refcursor,uid out  number,un out varchar2,em  out varchar)
+as
+    begin
+        open users for
+            select usid, uname, email  into  uid,un,em  from USERLOGIN;
+    end dispusers;
+
+procedure dispusers11(users out sys_refcursor,uid out  number,un out varchar2,em  out varchar,pass1 out varchar2)
+as
+    begin
+        open users for
+            select usid,email,PASS  into  uid,em,pass1  from USERLOGIN where UNAME=un;
+    end dispusers11;
+
+  procedure deluser(uid in number)
+    is
+begin
+    delete from USERLOGIN where USID=uid;
+    commit;
+end deluser;
+
+--addbillentry
+procedure  addbillentry(a varchar2,b number,c number,d varchar,e varchar)
+    is
+    begin
+        insert into BILLENTRY(BILLNO,img, userid, bookingid, totalpayment, status) values (BNO2.nextval,a,b,c,d,e);
+        commit ;
+        end addbillentry;
+
+procedure dispbillentry(IMG out sys_refcursor,bno out number,a out varchar2,b out number,c out number,d out varchar2, e out varchar2)
+    is
+begin
+    open IMG for
+        select BILLNO,img, userid, bookingid, totalpayment, status into  bno,a,b,c,d,e from BILLENTRY;
+commit ;
+end dispbillentry;
+
+procedure dispbillentry11(IMG out sys_refcursor,bno out number,a out varchar2,b out number,d out varchar2, e out varchar2,c in number)
+    is
+begin
+    open IMG for
+        select BILLNO,img, bookingid, totalpayment, status into  bno,a,b,d,e from BILLENTRY where USERID=c ;
+commit ;
+end dispbillentry11;
+
+procedure delbillentry(bpdf in varchar2)
+    is
+begin
+    delete from BILLENTRY where BILLNO=bpdf;
+    commit;
+end delbillentry;
+
+procedure upbillentry(a varchar2,b number,c number,d varchar,e varchar,bno number)
+    is
+    begin
+        update BILLENTRY set IMG=a,USERID=b,BOOKINGID=c,TOTALPAYMENT=d,STATUS=e where BILLNO=bno;
+        commit;
+    end upbillentry;
+
+--user profile
+procedure disuserprofil(user out sys_refcursor,uid out number,a in varchar2,b out varchar2,c out varchar2)
+is
+begin
+    open user for
+        SELECT USID,EMAIL,PASS into uid,b,c from  USERLOGIN  where  UNAME=a  ;
+    end disuserprofil;
+
+procedure updateuser(uid number,un varchar2,e varchar2,p varchar2)
+ is
+begin
+    update USERLOGIN set UNAME=un,EMAIL=e,PASS=p where USID=uid;
+    commit;
+end updateuser;
+
+procedure getuid(id out sys_refcursor,a out number,b in varchar2)
+    is
+    begin
+        open id for
+        select USID into a from USERLOGIN where UNAME=b;
+        end getuid;
+
+    procedure addpayment(bno1 number,d varchar2,t number)
+    is
+    begin
+        insert into PAYMENT(bno, dates, totalpayment) values(bno1,d,t);
+        update BILLENTRY set STATUS='Paid' where BILLNO=bno1;
+        commit ;
+        end addpayment;
+
+
+end fy;
+
+
+
+
+
